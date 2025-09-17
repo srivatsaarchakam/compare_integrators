@@ -15,21 +15,42 @@ using std::endl;
 // Integration using trapezoid rule 
 // npts : number of points used in calculation (npts>=2)
 double trapez (double (*f)(double x), unsigned npts, double min, double max) {
-  double sum=0.;		 
+  const double h = (max - min) / (npts - 1);
+  double sum = 0.5 * (f(min) + f(max));
 
-  // complete your code here
+  for (unsigned i = 1; i < npts - 1; ++i) {
+    const double x = min + (i * h);
+    sum = sum + f(x);
+  }
   
-  return (sum);
+  return (h * sum);
 }      
 
 // Integration using Simpson's rule
 // npts : number of points used in calculation (npts odd, and >=3)
 double simpson (double (*f)(double x), unsigned npts, double min, double max){  
-  double sum=0.;
+  const unsigned nint = npts - 1;
+  const double h = (max - min) / nint;
 
-  // complete your code here
-  
-  return (sum);
+  double sum = f(min) + f(max);
+  // odd points
+  double s4 = 0.0;
+  // even points
+  double s2 = 0.0;
+
+  for (unsigned i = 1; i < nint; ++i){
+    const double x = min + (i * h);
+    if (i % 2 == 1){
+      s4 = s4 + f(x);
+    }
+    else {
+      s2 = s2 + f(x);
+    }
+  }
+
+  sum = sum + (4.0 * s4 + 2.0 *s2);
+
+  return ((h/3) * sum);
 }  
 
 // Integration using Gauss's rule, code is based on the Landau text
@@ -161,10 +182,19 @@ void GaussInt::Init(int npoints){
 // once the constants for the n-point rule are calculated
 // the integral is a very simple sum
 double GaussInt::Integ(double (*f)(double x), double a, double b){
+  const double c1 = 0.5 * (b - a);
+  const double c2 = 0.5 * (b + a);
 
-  // ### complete code here ###
-  
-  return 0;  // integral of function f
+  long double acc  = 0.0L;
+  const size_t n = weight.size();
+
+  for (size_t i = 0; i < n; ++i){
+    const long double xi = (long double)lroots[i];
+    const long double xmap = c1 * (long double)xi + c2;
+    acc = acc + (long double)weight[i] * (long double)f((double)xmap);
+  }
+
+  return ((double)(c1 * acc));  // integral of function f
 }
 
 void GaussInt::PrintWA() const{
